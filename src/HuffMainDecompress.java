@@ -18,7 +18,6 @@ public class HuffMainDecompress {
 		hp.decompress(bis, bos);
 		System.out.printf("uncompress from %s to %s\n", 
 				           inf.getName(),outf.getName());		
-		
 		System.out.printf("file: %d bits to %d bits\n",inf.length()*8,outf.length()*8);
 		System.out.printf("read %d bits, wrote %d bits\n", 
 				           bis.bitsRead(),bos.bitsWritten());
