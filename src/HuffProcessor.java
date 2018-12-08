@@ -68,11 +68,11 @@ public class HuffProcessor {
 				break;
 			}
 			else {
-				// how to map values to int array ??
-				freq[bits] = freq[bits] + 1;
+				for(int i = 0; i < freq.length; i++) {
+					freq[bits]++;
+				}	
 			}
 		}
-		
 		return freq;
 	}
 	
@@ -99,6 +99,7 @@ public class HuffProcessor {
 	private String[] makeCodingsFromTree(HuffNode root) {
 		String[] encodings = new String[ALPH_SIZE + 1];
 	    traverse(encodings, root, "");
+	    if(myDebugLevel >= DEBUG_HIGH) System.out.println("encodings complete.");
 		return encodings;
 	}
 	
@@ -116,11 +117,9 @@ public class HuffProcessor {
     }
 	
 	private void writeHeader(HuffNode root, BitOutputStream out) {
-		// write in "HUFF_TREE"
+		out.writeBits(String.valueOf(HUFF_TREE).length(), HUFF_TREE);
 		
-		// if the node is a leaf
 		if(root.myLeft == null && root.myRight == null) {
-			// sort out how to properly write this
 			out.writeBits(BITS_PER_WORD+1, 1);
 			writeHeader(root.myLeft, out);
 			writeHeader(root.myRight, out);
@@ -128,15 +127,25 @@ public class HuffProcessor {
 		else {
 			out.writeBits(1, 0);
 		}
-		
+		if(myDebugLevel >= DEBUG_HIGH) System.out.println("header written.");
 		return;
 	}
 	
 	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
-		code = encoding['A'];
-		out.writeBits(code.length(), Integer.parseInt(code,2));
-
+		
+		while(true) {
+			int bits = in.readBits(BITS_PER_WORD);
+			if (bits == -1) {
+				String codeP = codings[PSEUDO_EOF];
+				out.writeBits(codeP.length(), Integer.parseInt(codeP,2));
+				break;
+			}
+			String code = codings[bits];
+			out.writeBits(code.length(), Integer.parseInt(code,2));
+		}
+		if(myDebugLevel >= DEBUG_HIGH) System.out.println("compressed bits written.");
 		return;
+
 	}
 	
 	// DECOMPRESSION-RELATED METHODS
