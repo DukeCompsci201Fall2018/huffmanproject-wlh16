@@ -68,9 +68,7 @@ public class HuffProcessor {
 				break;
 			}
 			else {
-				for(int i = 0; i < freq.length; i++) {
-					freq[bits]++;
-				}	
+				freq[bits] = freq[bits]+1;
 			}
 		}
 		return freq;
@@ -103,7 +101,7 @@ public class HuffProcessor {
 		return encodings;
 	}
 	
-	public void traverse(String[] encodings, HuffNode tree, String path) {
+	private void traverse(String[] encodings, HuffNode tree, String path) {
     	if(tree == null) return;
     	if(tree.myLeft == null && tree.myRight == null) {
     		 encodings[tree.myValue] = path;
@@ -117,15 +115,14 @@ public class HuffProcessor {
     }
 	
 	private void writeHeader(HuffNode root, BitOutputStream out) {
-		out.writeBits(String.valueOf(HUFF_TREE).length(), HUFF_TREE);
-		
 		if(root.myLeft == null && root.myRight == null) {
-			out.writeBits(BITS_PER_WORD+1, 1);
-			writeHeader(root.myLeft, out);
-			writeHeader(root.myRight, out);
+			out.writeBits(1, 1);
+			out.writeBits(BITS_PER_WORD+1, root.myValue);
 		}
 		else {
 			out.writeBits(1, 0);
+			writeHeader(root.myLeft, out);
+			writeHeader(root.myRight, out);
 		}
 		if(myDebugLevel >= DEBUG_HIGH) System.out.println("header written.");
 		return;
